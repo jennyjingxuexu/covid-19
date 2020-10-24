@@ -29,7 +29,6 @@ func (db Orm) GetUserByUsername(username string) (u *model.User, err error) {
 
 // CreateUserSession creates a new user session
 func (db Orm) CreateUserSession(u *model.UserSession) (inserted *model.UserSession, err error) {
-	u = &model.UserSession{}
 	if _, err := db.Table("UserSession").Insert(u); err != nil {
 		return nil, errors.WithMessage(err, "Error Creating UserSession - Database Error")
 	}

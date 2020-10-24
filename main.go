@@ -31,6 +31,7 @@ func main() {
 	})
 
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
+	r.HandleFunc("/login", user.CreateUserSession()).Methods("POST")
 	http.Handle("/", r)
 	srv := &http.Server{
 		Handler: r,
