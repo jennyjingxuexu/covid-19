@@ -1,7 +1,7 @@
 package handler
 
 import (
-	"covid-19/model"
+	"covid-19/internal/model"
 	"encoding/json"
 	"net/http"
 

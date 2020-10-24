@@ -1,7 +1,7 @@
 package database
 
 import (
-	"covid-19/model"
+	"covid-19/internal/model"
 
 	"github.com/pkg/errors"
 )
