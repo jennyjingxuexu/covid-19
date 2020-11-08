@@ -10,12 +10,13 @@ import (
 
 // User of the app
 type User struct {
-	ID       string `xorm:"id" json:"id,omitempty"`
+	ID       string `xorm:"id" json:"id"`
 	Username string `xorm:"username" json:"username" r-validate:"username"`
 	Password string `xorm:"password" json:"password,omitempty" r-validate:"password"`
 }
 
 // ValidateUserRequest validates the User struct as the User was constructed by the http request
+// TODO: Need to better organize the code, maybe we can make the validation step more abstract.
 func ValidateUserRequest(u User) error {
 	validator := ReuqestValidator()
 	validator.SetValidationFunc("username", username)
