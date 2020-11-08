@@ -14,6 +14,15 @@ func (db Orm) CreateQuestion(q *model.Question) (inserted *model.Question, err e
 	return q, nil
 }
 
+// ListQuestions gets Question from db by id
+// TODO: Support Pagination
+// TODO: Support Search
+func (db Orm) ListQuestions() (qs []*model.Question, err error) {
+	qs = []*model.Question{}
+	err = db.Table("User").Find(qs)
+	return qs, errors.WithMessage(err, "Error Getting Question - Database Error")
+}
+
 // GetQuestionByID gets Question from db by id
 func (db Orm) GetQuestionByID(id string) (q *model.Question, err error) {
 	q = &model.Question{}
