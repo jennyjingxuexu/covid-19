@@ -8,7 +8,7 @@ import (
 
 // CreateQuestion inserts new question
 func (db Orm) CreateQuestion(q *model.Question) (inserted *model.Question, err error) {
-	if _, err := db.Table("User").Insert(q); err != nil {
+	if _, err := db.Table("Question").Insert(q); err != nil {
 		return nil, errors.WithMessage(err, "Error Creating User - Database Error")
 	}
 	return q, nil

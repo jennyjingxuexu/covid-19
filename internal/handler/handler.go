@@ -4,3 +4,8 @@ package handler
 func NewUserProvider(u userService) (up UserProvider) {
 	return UserProvider{u}
 }
+
+// NewQuestionProvider returns a provider for Question related operations.
+func NewQuestionProvider(q questionService) (qp QuestionProvider) {
+	return QuestionProvider{q}
+}

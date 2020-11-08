@@ -10,7 +10,7 @@ import (
 	log "github.com/sirupsen/logrus"
 )
 
-// UserService is an interface describing all operations related to User
+// questionService is an interface describing all operations related to User
 type questionService interface {
 	CreateQuestion(*model.Question) (*model.Question, error)
 	GetQuestionByID(string) (*model.Question, error)

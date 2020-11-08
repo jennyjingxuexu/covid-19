@@ -8,5 +8,6 @@ import (
 func ReuqestValidator() *validator.Validator {
 	v := validator.NewValidator()
 	v.SetTag("r-validate")
+	v.SetPrintJSON(true)
 	return v
 }

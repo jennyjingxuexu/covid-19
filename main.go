@@ -23,12 +23,15 @@ func main() {
 
 	orm := database.GetOrm(env.Db)
 	user := handler.NewUserProvider(orm)
+	question := handler.NewQuestionProvider(orm)
 
 	r := mux.NewRouter()
 	r.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		// an example API handler
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
+
+	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
 
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
 	r.HandleFunc("/login", user.CreateUserSession()).Methods("POST")
