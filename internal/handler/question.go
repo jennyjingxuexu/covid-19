@@ -13,12 +13,26 @@ import (
 // questionService is an interface describing all operations related to User
 type questionService interface {
 	CreateQuestion(*model.Question) (*model.Question, error)
-	GetQuestionByID(string) (*model.Question, error)
+	ListQuestions() ([]*model.Question, error)
 }
 
 // QuestionProvider provides handlers for handling question related http requests
 type QuestionProvider struct {
 	question questionService
+}
+
+// ListQuestions list all questions
+// TODO: Support pagination
+func (provider QuestionProvider) ListQuestions() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if qs, err := provider.question.ListQuestions(); err != nil {
+			log.Error(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		} else {
+			json.NewEncoder(w).Encode(qs)
+		}
+	})
 }
 
 // CreateQuestion creates a Question

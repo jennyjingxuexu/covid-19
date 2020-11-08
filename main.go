@@ -34,6 +34,7 @@ func main() {
 	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
 
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
+	r.HandleFunc("/questions", question.ListQuetions())).Methods("GET")
 	r.HandleFunc("/login", user.CreateUserSession()).Methods("POST")
 	http.Handle("/", r)
 	srv := &http.Server{
