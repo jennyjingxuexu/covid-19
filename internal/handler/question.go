@@ -16,6 +16,8 @@ type questionService interface {
 	CreateQuestionSection(*model.QuestionSection) (*model.QuestionSection, error)
 	ListQuestions() ([]*model.Question, error)
 	ListQuestionSections() ([]*model.QuestionSection, error)
+	GetQuestionSectionByID(string) (*model.QuestionSection, error)
+	GetQuestionSectionByName(string) (*model.QuestionSection, error)
 }
 
 // QuestionProvider provides handlers for handling question related http requests
@@ -68,6 +70,12 @@ func (provider QuestionProvider) CreateQuestion() http.HandlerFunc {
 			return
 		}
 
+		if has, _ := provider.question.GetQuestionSectionByID(q.QuestionSectionID); has == nil {
+			err = errors.Wrap(errors.Errorf("Question Section with id(%v) does not exist", q.QuestionSectionID), "Invalid Request")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
 		q.ID = uuid.New().String()
 
 		if q, err = provider.question.CreateQuestion(q); err != nil {
@@ -92,6 +100,12 @@ func (provider QuestionProvider) CreateQuestionSection() http.HandlerFunc {
 		}
 		if err = model.ValidateQuestionSectionRequest(*qs); err != nil {
 			err = errors.Wrap(err, "Invalid Request")
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+
+		if has, _ := provider.question.GetQuestionSectionByName(qs.Name); has != nil {
+			err = errors.Wrap(errors.Errorf("Question Section with name(%v) already exist", qs.Name), "Invalid Request")
 			http.Error(w, err.Error(), http.StatusBadRequest)
 			return
 		}

@@ -47,7 +47,7 @@ func (provider UserProvider) CreateUser() http.HandlerFunc {
 				log.Error(err)
 				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			} else {
-				err = errors.New("Username already exist")
+				err = errors.Wrap(errors.New("Username already exist"), "Invalid Request")
 				http.Error(w, err.Error(), http.StatusBadRequest)
 			}
 			return
