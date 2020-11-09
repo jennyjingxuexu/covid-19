@@ -3,7 +3,9 @@ module covid-19
 go 1.15
 
 require (
-	github.com/go-xorm/xorm v0.7.9
+	github.com/go-playground/locales v0.13.0
+	github.com/go-playground/universal-translator v0.17.0
+	github.com/go-playground/validator/v10 v10.4.1
 	github.com/google/uuid v1.1.2
 	github.com/gorilla/mux v1.8.0
 	github.com/joho/godotenv v1.3.0
@@ -12,7 +14,8 @@ require (
 	github.com/lib/pq v1.8.0
 	github.com/pkg/errors v0.9.1
 	github.com/sirupsen/logrus v1.7.0
-	golang.org/x/crypto v0.0.0-20190325154230-a5d413f7728c
-	gopkg.in/validator.v2 v2.0.0-20200605151824-2b28d334fa05
+	golang.org/x/crypto v0.0.0-20200622213623-75b288015ac9
+	golang.org/x/sync v0.0.0-20190227155943-e225da77a7e6 // indirect
+	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 	xorm.io/xorm v1.0.5
 )

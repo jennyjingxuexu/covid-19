@@ -1,11 +1,11 @@
 package model
 
 import (
-	"reflect"
 	"regexp"
 	"unicode"
 
-	"github.com/pkg/errors"
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 )
 
 // User of the app
@@ -18,36 +18,39 @@ type User struct {
 // ValidateUserRequest validates the User struct as the User was constructed by the http request
 // TODO: Need to better organize the code, maybe we can make the validation step more abstract.
 func ValidateUserRequest(u User) error {
-	validator := ReuqestValidator()
-	validator.SetValidationFunc("username", username)
-	validator.SetValidationFunc("password", password)
-	return validator.Validate(u)
+	v := ReuqestValidator()
+	v.RegisterValidation("username", username)
+	v.RegisterValidation("password", password)
+	v.RegisterTranslation("username", *ValidatorTranslator(), func(ut ut.Translator) error {
+		return ut.Add("username", "{0} must have a minimum of 3 maximum of 16 letters", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("username", fe.Field())
+		return t
+	})
+	v.RegisterTranslation("password", *ValidatorTranslator(), func(ut ut.Translator) error {
+		return ut.Add("password", "{0} must contain 1 special character, 1 uppercase, 1 lower case letter and have a minimum of 3 maximum of 16 letters", true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("password", fe.Field())
+		return t
+	})
+	return TranslateError(v.Struct(u))
 }
 
-func username(v interface{}, _ string) error {
-	st := reflect.ValueOf(v)
-	if st.Kind() != reflect.String {
-		return errors.New("username validator only validates strings")
-	}
+func username(fl validator.FieldLevel) bool {
+	st := fl.Field()
 
 	// alphanumeric with '-' and '_', min 3, max 16
 	const usernameString = "^[a-z0-9_-]{3,16}$"
 	usernameRegEx := regexp.MustCompile(usernameString)
 
-	if !usernameRegEx.MatchString(st.String()) {
-		return errors.New("Invalid Username")
-	}
-	return nil
+	return usernameRegEx.MatchString(st.String())
 }
 
-func password(v interface{}, _ string) error {
-	st := reflect.ValueOf(v)
-	if st.Kind() != reflect.String {
-		return errors.New("password validator only validates strings")
-	}
+func password(fl validator.FieldLevel) bool {
+	st := fl.Field()
 	p := st.String()
 	if len(p) < 6 || len(p) > 32 {
-		return errors.New("Password length must be between 6 and 32")
+		return false
 	}
 	var lower, upper, digit, special bool
 	for _, r := range p {
@@ -66,7 +69,7 @@ func password(v interface{}, _ string) error {
 		}
 	}
 	if !(lower && upper && digit && special) {
-		return errors.New("Password must contain 1 lowercase letter, 1 uppercase letter, 1 digit, and 1 special charactor")
+		return false
 	}
-	return nil
+	return true
 }

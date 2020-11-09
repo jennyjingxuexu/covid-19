@@ -26,15 +26,19 @@ func main() {
 	question := handler.NewQuestionProvider(orm)
 
 	r := mux.NewRouter()
+	r.Use(handler.DefaultMiddleware)
+
 	r.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		// an example API handler
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
 
 	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
+	r.HandleFunc("/_/admin/questions/sections", question.CreateQuestionSection()).Methods("POST")
 
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
-	r.HandleFunc("/questions", question.ListQuetions())).Methods("GET")
+	r.HandleFunc("/questions", question.ListQuestions()).Methods("GET")
+	r.HandleFunc("/questions/sections", question.ListQuestionSections()).Methods("GET")
 	r.HandleFunc("/login", user.CreateUserSession()).Methods("POST")
 	http.Handle("/", r)
 	srv := &http.Server{
@@ -46,5 +50,4 @@ func main() {
 	}
 
 	log.Fatal(srv.ListenAndServe())
-
 }

@@ -1,8 +1,10 @@
 package model
 
 import (
-	"reflect"
+	"fmt"
 
+	ut "github.com/go-playground/universal-translator"
+	"github.com/go-playground/validator/v10"
 	"github.com/pkg/errors"
 )
 
@@ -11,22 +13,33 @@ var qTypes = []string{"TRUE_FALSE", "SINGLE_SELECT"}
 // Question in the bank
 // Currently the only implementation supported is choice based questions.
 type Question struct {
-	ID            string                 `xorm:"id" json:"id"`
-	QuestionType  string                 `xorm:"question_type" json:"question_type" r-validate:"nonzero,question-type"`
-	Question      string                 `xorm:"question" json:"question,omitempty" r-validate:"nonzero"`
-	CorrectChoice string                 `xorm:"correct_choice" json:"correct_choice" r-validate:"nonzero"`
-	Choices       map[string]interface{} `xorm:"choices" json:"choices" r-validate:"nonzero"`
+	ID                string                 `xorm:"id" json:"id"`
+	QuestionType      string                 `xorm:"question_type" json:"question_type" r-validate:"required,question-type"`
+	Question          string                 `xorm:"question" json:"question" r-validate:"required"`
+	QuestionSectionID string                 `xorm:"question_section_id ->" json:"question_section_id,omitempty" r-validate:"uuid,required"`
+	QuestionSection   QuestionSection        `xorm:"question_section <- extends" json:"question_section,omitempty" r-validate:"-"`
+	CorrectChoice     string                 `xorm:"correct_choice" json:"correct_choice" r-validate:"required"`
+	Choices           map[string]interface{} `xorm:"choices" json:"choices" r-validate:"required"`
 }
 
 // ValidateQuestionRequest validates the Question struct as the Question was constructed by the http request
 // TODO: Need to better organize the code, maybe we can make the validation step more abstract.
 func ValidateQuestionRequest(q Question) error {
-	validator := ReuqestValidator()
-	validator.SetValidationFunc("question-type", questionType)
-	err := validator.Validate(q)
+	v := ReuqestValidator()
+	v.RegisterValidation("question-type", questionType)
+	v.RegisterTranslation("question-type", *ValidatorTranslator(), func(ut ut.Translator) error {
+		return ut.Add("question-type", fmt.Sprintf("{0} must be one of %v", qTypes), true)
+	}, func(ut ut.Translator, fe validator.FieldError) string {
+		t, _ := ut.T("question-type", fe.Field())
+		return t
+	})
+
+	err := TranslateError(v.Struct(q))
 	if err != nil {
 		return err
 	}
+
+	// TODO: ALL following can be refactored to use validator package, should do it.
 
 	// cross field validation
 	// TODO: maybe we need to support more than choice based questions.
@@ -66,17 +79,10 @@ func ValidateQuestionRequest(q Question) error {
 	return nil
 }
 
-func questionType(v interface{}, _ string) error {
-	st := reflect.ValueOf(v)
-	if st.Kind() != reflect.String {
-		return errors.New("question-type validator only validates strings")
-	}
+func questionType(fl validator.FieldLevel) bool {
+	st := fl.Field()
 	qType := st.String()
-
-	if !contains(qType, qTypes) {
-		return errors.Errorf("question_type must be one of %v", qTypes)
-	}
-	return nil
+	return contains(qType, qTypes)
 }
 
 func contains(str string, strs []string) bool {

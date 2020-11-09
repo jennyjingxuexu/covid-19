@@ -9,17 +9,34 @@ import (
 // CreateQuestion inserts new question
 func (db Orm) CreateQuestion(q *model.Question) (inserted *model.Question, err error) {
 	if _, err := db.Table("Question").Insert(q); err != nil {
-		return nil, errors.WithMessage(err, "Error Creating User - Database Error")
+		return nil, errors.WithMessage(err, "Error Creating Question - Database Error")
 	}
 	return q, nil
 }
 
-// ListQuestions gets Question from db by id
+// CreateQuestionSection inserts new question section
+func (db Orm) CreateQuestionSection(qs *model.QuestionSection) (inserted *model.QuestionSection, err error) {
+	if _, err := db.Table("QuestionSection").Insert(qs); err != nil {
+		return nil, errors.WithMessage(err, "Error Creating Question Section - Database Error")
+	}
+	return qs, nil
+}
+
+// ListQuestions gets Questions from db
 // TODO: Support Pagination
 // TODO: Support Search
 func (db Orm) ListQuestions() (qs []*model.Question, err error) {
 	qs = []*model.Question{}
-	err = db.Table("User").Find(qs)
+	err = db.Table("Question").Find(&qs)
+	return qs, errors.WithMessage(err, "Error Getting Question - Database Error")
+}
+
+// ListQuestionSections gets Question Sections from db
+// TODO: Support Pagination
+// TODO: Support Search
+func (db Orm) ListQuestionSections() (qs []*model.QuestionSection, err error) {
+	qs = []*model.QuestionSection{}
+	err = db.Table("QuestionSection").Find(&qs)
 	return qs, errors.WithMessage(err, "Error Getting Question - Database Error")
 }
 
@@ -27,7 +44,7 @@ func (db Orm) ListQuestions() (qs []*model.Question, err error) {
 func (db Orm) GetQuestionByID(id string) (q *model.Question, err error) {
 	q = &model.Question{}
 	var has bool
-	if has, err = db.Table("User").Where("id = ?", id).Get(q); err != nil {
+	if has, err = db.Table("Question").Where("id = ?", id).Get(q); err != nil {
 		return nil, errors.WithMessage(err, "Error Getting Question - Database Error")
 	}
 	if !has {
