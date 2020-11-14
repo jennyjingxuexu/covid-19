@@ -46,6 +46,7 @@ func main() {
 	authenticatedRouter.HandleFunc("/answers", answer.BulkUpsertUserAnswer()).Methods("POST")
 	authenticatedRouter.HandleFunc("/answers", answer.GetUserAnswers()).Methods("GET")
 
+	r.HandleFunc("/", handler.NotFoundHandler)
 	http.Handle("/", r)
 	srv := &http.Server{
 		Handler: r,
@@ -55,5 +56,6 @@ func main() {
 		ReadTimeout:  15 * time.Second,
 	}
 
+	log.Println("Starting....")
 	log.Fatal(srv.ListenAndServe())
 }

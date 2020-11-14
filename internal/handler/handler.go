@@ -2,6 +2,7 @@ package handler
 
 import (
 	"context"
+	"fmt"
 	"net/http"
 
 	log "github.com/sirupsen/logrus"
@@ -29,7 +30,13 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 		// TODO: May want to tighten this up
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "*")
-		next.ServeHTTP(w, r)
+		if r.Method == "OPTIONS" {
+			fmt.Println("AAA")
+			//handle preflight
+		} else {
+			next.ServeHTTP(w, r)
+		}
+
 	})
 }
 
@@ -50,6 +57,7 @@ func UserContextMiddleware(u userService) func(next http.Handler) http.Handler {
 					http.Error(w, "User not authenticated", http.StatusUnauthorized)
 					return
 				}
+				// TODO: Create a const type for context key
 				ctx := context.WithValue(r.Context(), "user_id", session.UserID)
 				next.ServeHTTP(w, r.WithContext(ctx))
 			} else {
@@ -57,4 +65,10 @@ func UserContextMiddleware(u userService) func(next http.Handler) http.Handler {
 			}
 		})
 	}
+}
+
+// NotFoundHandler is the catch all handler
+func NotFoundHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	fmt.Fprintf(w, "404 - Not Found")
 }
