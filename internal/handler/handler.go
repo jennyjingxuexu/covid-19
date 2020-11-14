@@ -31,8 +31,7 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "*")
 		if r.Method == "OPTIONS" {
-			fmt.Println("AAA")
-			//handle preflight
+			//handle preflight, need to do better, should handle each case separately
 		} else {
 			next.ServeHTTP(w, r)
 		}

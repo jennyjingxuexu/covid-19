@@ -46,7 +46,7 @@ func main() {
 	authenticatedRouter.HandleFunc("/answers", answer.BulkUpsertUserAnswer()).Methods("POST")
 	authenticatedRouter.HandleFunc("/answers", answer.GetUserAnswers()).Methods("GET")
 
-	r.HandleFunc("/", handler.NotFoundHandler)
+	r.PathPrefix("/").HandlerFunc(handler.NotFoundHandler)
 	http.Handle("/", r)
 	srv := &http.Server{
 		Handler: r,
