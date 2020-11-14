@@ -26,7 +26,7 @@ func NewAnswerProvider(a answerService, q questionService) (ap AnswerProvider) {
 func DefaultMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
-		// May want to tighten this up
+		// TODO: May want to tighten this up
 		w.Header().Add("Access-Control-Allow-Origin", "*")
 		w.Header().Add("Access-Control-Allow-Headers", "*")
 		next.ServeHTTP(w, r)
