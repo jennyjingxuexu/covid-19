@@ -16,6 +16,7 @@ type questionService interface {
 	CreateQuestionSection(*model.QuestionSection) (*model.QuestionSection, error)
 	ListQuestions() ([]*model.Question, error)
 	ListQuestionSections() ([]*model.QuestionSection, error)
+	GetQuestionByID(id string) (*model.Question, error)
 	GetQuestionSectionByID(string) (*model.QuestionSection, error)
 	GetQuestionSectionByName(string) (*model.QuestionSection, error)
 }
@@ -77,6 +78,12 @@ func (provider QuestionProvider) CreateQuestion() http.HandlerFunc {
 		}
 
 		q.ID = uuid.New().String()
+		q.MaxPoint = 0
+		for _, choice := range q.Choices {
+			if choice.Point > q.MaxPoint {
+				q.MaxPoint = choice.Point
+			}
+		}
 
 		if q, err = provider.question.CreateQuestion(q); err != nil {
 			log.Error(err)

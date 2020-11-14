@@ -24,6 +24,7 @@ func main() {
 	orm := database.GetOrm(env.Db)
 	user := handler.NewUserProvider(orm)
 	question := handler.NewQuestionProvider(orm)
+	answer := handler.NewAnswerProvider(orm, orm)
 
 	r := mux.NewRouter()
 	r.Use(handler.DefaultMiddleware)
@@ -35,11 +36,16 @@ func main() {
 
 	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
 	r.HandleFunc("/_/admin/questions/sections", question.CreateQuestionSection()).Methods("POST")
-
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
 	r.HandleFunc("/questions", question.ListQuestions()).Methods("GET")
 	r.HandleFunc("/questions/sections", question.ListQuestionSections()).Methods("GET")
 	r.HandleFunc("/login", user.CreateUserSession()).Methods("POST")
+
+	authenticatedRouter := r.PathPrefix("/user").Subrouter()
+	authenticatedRouter.Use(handler.UserContextMiddleware(orm))
+	authenticatedRouter.HandleFunc("/answers", answer.BulkUpsertUserAnswer()).Methods("POST")
+	authenticatedRouter.HandleFunc("/answers", answer.GetUserAnswers()).Methods("GET")
+
 	http.Handle("/", r)
 	srv := &http.Server{
 		Handler: r,

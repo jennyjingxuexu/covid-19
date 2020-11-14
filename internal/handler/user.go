@@ -17,6 +17,7 @@ type userService interface {
 	CreateUser(*model.User) (*model.User, error)
 	GetUserByUsername(string) (*model.User, error)
 	CreateUserSession(*model.UserSession) (*model.UserSession, error)
+	RefreshUserSession(string) (*model.UserSession, error)
 }
 
 // UserProvider provides handlers for handling user related http requests

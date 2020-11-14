@@ -44,7 +44,8 @@ func (db Orm) ListQuestionSections() (qs []*model.QuestionSection, err error) {
 func (db Orm) GetQuestionByID(id string) (q *model.Question, err error) {
 	q = &model.Question{}
 	var has bool
-	if has, err = db.Table("Question").Where("id = ?", id).Get(q); err != nil {
+	has, err = db.Table("Question").Select("\"Question\".*, \"QuestionSection\".name AS question_section_name").Join("INNER", "QuestionSection", "\"Question\".question_section_id = \"QuestionSection\".id").Where("\"Question\".id = ?", id).Get(q)
+	if err != nil {
 		return nil, errors.WithMessage(err, "Error Getting Question - Database Error")
 	}
 	if !has {

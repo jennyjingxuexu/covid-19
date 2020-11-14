@@ -19,8 +19,8 @@ var (
 	translate *ut.Translator
 )
 
-// ReuqestValidator returns a validator that validates based on struct tag r-validate.
-func ReuqestValidator() *validator.Validate {
+// RequestValidator returns a validator that validates based on struct tag r-validate.
+func RequestValidator() *validator.Validate {
 	if validate != nil {
 		return validate
 	}

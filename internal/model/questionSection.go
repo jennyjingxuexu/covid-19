@@ -9,6 +9,6 @@ type QuestionSection struct {
 // ValidateQuestionSectionRequest validates the QuestionSection struct as the Question was constructed by the http request
 // TODO: Need to better organize the code, maybe we can make the validation step more abstract.
 func ValidateQuestionSectionRequest(qs QuestionSection) error {
-	v := ReuqestValidator()
+	v := RequestValidator()
 	return TranslateError(v.Struct(qs))
 }

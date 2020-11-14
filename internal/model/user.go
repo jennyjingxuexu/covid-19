@@ -18,7 +18,7 @@ type User struct {
 // ValidateUserRequest validates the User struct as the User was constructed by the http request
 // TODO: Need to better organize the code, maybe we can make the validation step more abstract.
 func ValidateUserRequest(u User) error {
-	v := ReuqestValidator()
+	v := RequestValidator()
 	v.RegisterValidation("username", username)
 	v.RegisterValidation("password", password)
 	v.RegisterTranslation("username", *ValidatorTranslator(), func(ut ut.Translator) error {
