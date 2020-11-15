@@ -81,8 +81,6 @@ func (provider UserProvider) CreateUser() http.HandlerFunc {
 // 		 some more funding than I am willing to spare right now)
 func (provider UserProvider) CreateUserSession() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		log.Error("AAA")
-		log.Error(w.Header())
 		// also due to laziness auth is stored in user for now.
 		authInfo := &model.User{}
 		var err error
@@ -122,6 +120,9 @@ func (provider UserProvider) CreateUserSession() http.HandlerFunc {
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		}
+		expiration := time.Now().Add(365 * 24 * time.Hour)
+		cookie := http.Cookie{Name: "user_session_id", Value: s.ID, SameSite: http.SameSiteNoneMode, Expires: expiration, Secure: true}
+		http.SetCookie(w, &cookie)
 		json.NewEncoder(w).Encode(s)
 	})
 }

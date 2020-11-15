@@ -13,11 +13,11 @@ var qTypes = []string{"TRUE_FALSE", "SINGLE_SELECT"}
 // Question in the bank
 // Currently the only implementation supported is choice based questions.
 type Question struct {
-	ID           string            `xorm:"id" json:"id"`
-	QuestionType string            `xorm:"question_type" json:"question_type" r-validate:"required,question-type"`
-	Question     string            `xorm:"question" json:"question" r-validate:"required"`
-	Choices      map[string]Choice `xorm:"choices" json:"choices" r-validate:"required"`
-	MaxPoint     int               `xorm:"-> max_point" json:"-"`
+	ID           string             `xorm:"id" json:"id"`
+	QuestionType string             `xorm:"question_type" json:"question_type" r-validate:"required,question-type"`
+	Question     string             `xorm:"question" json:"question" r-validate:"required"`
+	Choices      map[string]*Choice `xorm:"choices" json:"choices" r-validate:"required"`
+	MaxPoint     int                `xorm:"-> max_point" json:"-"`
 	// TODO: should just use QuestionSection Model, but xorm right now has a bug with "extends" tag.
 	QuestionSectionID   string `xorm:"-> question_section_id" json:"question_section_id,omitempty" r-validate:"uuid,required"`
 	QuestionSectionName string `xorm:"<- question_section_name" json:"question_section_name,omitempty" r-validate:"-"`

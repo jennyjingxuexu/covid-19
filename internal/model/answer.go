@@ -8,7 +8,9 @@ type Answer struct {
 	UserID     string `xorm:"user_id" json:"user_id"`
 	QuestionID string `xorm:"question_id" json:"question_id" r-validate:"uuid,required"`
 	Choice     string `xorm:"choice" json:"choice" r-validate:"required"`
-	Point      int    `xorm:"point" json:"point"`
+	Point      int    `xorm:"point" json:"-"`
+	// TODO: should just populate it from db
+	PossiblePoint int `xorm:"-" json:"-"`
 }
 
 type questionGetter interface {
@@ -34,6 +36,7 @@ func ValidateAndPopulateAnswerRequest(a *Answer, qg questionGetter) error {
 	if c, ok := q.Choices[a.Choice]; !ok {
 		return errors.Errorf("question_id(%s) does not have choice %s", a.QuestionID, a.Choice)
 	} else {
+		a.PossiblePoint = q.MaxPoint
 		a.Point = c.Point
 	}
 	return nil

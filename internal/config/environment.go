@@ -5,7 +5,8 @@ import (
 )
 
 type Env struct {
-	Db DB
+	Db     DB
+	AppEnv string
 }
 
 type DB struct {

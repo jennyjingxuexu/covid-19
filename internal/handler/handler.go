@@ -28,8 +28,9 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		// TODO: May want to tighten this up
-		w.Header().Add("Access-Control-Allow-Origin", "*")
-		w.Header().Add("Access-Control-Allow-Headers", "*")
+		w.Header().Add("Access-Control-Allow-Origin", "http://localhost:8000", "http://http://3.130.191.129:8001")
+		w.Header().Add("Access-Control-Allow-Credentials", "true")
+		w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 		if r.Method == "OPTIONS" {
 			//handle preflight, need to do better, should handle each case separately
 		} else {
@@ -40,28 +41,36 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 }
 
 // UserContextMiddleware adds the user-id to request
-func UserContextMiddleware(u userService) func(next http.Handler) http.Handler {
+func UserContextMiddleware(u userService, isProd bool) func(next http.Handler) http.Handler {
 	return func(next http.Handler) http.Handler {
 		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			sessionID := ""
 			cookie, _ := r.Cookie("user_session_id")
 			if cookie != nil {
-				sessionID := cookie.Value
-				session, err := u.RefreshUserSession(sessionID)
-				if err != nil {
-					log.Error(err)
-					http.Error(w, "Internal Server Error", http.StatusInternalServerError)
-					return
-				}
-				if session == nil {
-					http.Error(w, "User not authenticated", http.StatusUnauthorized)
-					return
-				}
-				// TODO: Create a const type for context key
-				ctx := context.WithValue(r.Context(), "user_id", session.UserID)
-				next.ServeHTTP(w, r.WithContext(ctx))
+				sessionID = cookie.Value
 			} else {
-				http.Error(w, "User not authenticated", http.StatusUnauthorized)
+				// When developing there is this problem of CORS and we HTTPS, so get session from query instead
+				if !isProd {
+					sessionIDs := r.URL.Query()["user_session_id"]
+					if len(sessionIDs) == 0 {
+						http.Error(w, "User not authenticated", http.StatusUnauthorized)
+					}
+					sessionID = sessionIDs[0]
+				}
 			}
+			session, err := u.RefreshUserSession(sessionID)
+			if err != nil {
+				log.Error(err)
+				http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+				return
+			}
+			if session == nil {
+				http.Error(w, "User not authenticated", http.StatusUnauthorized)
+				return
+			}
+			// TODO: Create a const type for context key
+			ctx := context.WithValue(r.Context(), "user_id", session.UserID)
+			next.ServeHTTP(w, r.WithContext(ctx))
 		})
 	}
 }

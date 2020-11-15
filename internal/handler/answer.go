@@ -3,9 +3,10 @@ package handler
 import (
 	"covid-19/internal/model"
 	"encoding/json"
-	"github.com/google/uuid"
 	"net/http"
 	"strconv"
+
+	"github.com/google/uuid"
 
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
@@ -27,6 +28,8 @@ type AnswerProvider struct {
 // BulkUpsertUserAnswer upserts answers in bulk
 func (provider AnswerProvider) BulkUpsertUserAnswer() http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		score := 0
+		total := 0
 		as := []*model.Answer{}
 		if err := json.NewDecoder(r.Body).Decode(&as); err != nil {
 			log.Error(err)
@@ -44,6 +47,8 @@ func (provider AnswerProvider) BulkUpsertUserAnswer() http.HandlerFunc {
 				a.ID = uuid.New().String()
 				toBeUpserted = append(toBeUpserted, a)
 			}
+			score += a.Point
+			total += a.PossiblePoint
 		}
 		if err := provider.answer.BulkUpsertUserAnswer(r.Context().Value("user_id").(string), toBeUpserted); err != nil {
 			log.Error(err)
@@ -53,6 +58,12 @@ func (provider AnswerProvider) BulkUpsertUserAnswer() http.HandlerFunc {
 		if len(validationErr) != 0 {
 			json.NewEncoder(w).Encode(validationErr)
 		}
+		// TODO: Move this to model package
+		respBody := struct {
+			Score int
+			Total int
+		}{score, total}
+		json.NewEncoder(w).Encode(respBody)
 	})
 }
 

@@ -28,13 +28,20 @@ type QuestionProvider struct {
 
 // ListQuestions list all questions
 // TODO: Support pagination
-func (provider QuestionProvider) ListQuestions() http.HandlerFunc {
+func (provider QuestionProvider) ListQuestions(isAdmin bool) http.HandlerFunc {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if qs, err := provider.question.ListQuestions(); err != nil {
 			log.Error(err)
 			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
 			return
 		} else {
+			if !isAdmin {
+				for i := range qs {
+					for k := range qs[i].Choices {
+						qs[i].Choices[k].Point = 0
+					}
+				}
+			}
 			json.NewEncoder(w).Encode(qs)
 		}
 	})
