@@ -28,7 +28,7 @@ func DefaultMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Add("Content-Type", "application/json")
 		// TODO: May want to tighten this up
-		w.Header().Add("Access-Control-Allow-Origin", "http://localhost:8000", "http://http://3.130.191.129:8001")
+		w.Header().Add("Access-Control-Allow-Origin", r.Header.Get("Origin"))
 		w.Header().Add("Access-Control-Allow-Credentials", "true")
 		w.Header().Add("Access-Control-Allow-Headers", "Origin, X-Requested-With, Content-Type, Accept")
 		if r.Method == "OPTIONS" {
