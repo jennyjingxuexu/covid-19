@@ -1,0 +1,317 @@
+openapi: "3.0.0"
+info:
+  description: "Covid-19 Risk Calculator Backend"
+  version: "0.1.0"
+  title: "Covid-19 Risk Calculator Backend"
+
+servers:
+  - url: http://http://3.130.191.129:8000/
+    description: Pulic Test Server
+
+paths:
+  /_/admin/questions:
+    post:
+      tags:
+      - "admin routes"
+      summary: "Add a new question"
+      operationId: "createQuestion"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Question"
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionResponse"
+
+  /_/admin/questions/sections:
+    post:
+      tags:
+      - "admin routes"
+      summary: "add a new question section"
+      operationId: "createQuestionSection"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/QuestionSection"
+      responses:
+        200:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/QuestionSectionResponse"
+
+  /users:
+    post:
+      tags:
+      - "users"
+      summary: "Create a user"
+      operationId: "createUser"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserResponse"
+
+  /login:
+    post:
+      tags:
+      - "users"
+      summary: "login authentication endpoint for user"
+      operationId: "createUserSession"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/User"
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/UserSession"
+
+  /user/answers:
+    post:
+      tags:
+      - "authenticated routes"
+      summary: "submitting a list of questions"
+      operationId: "bulk upsert answers"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: array
+              items:
+                $ref: "#/components/schemas/Answer"
+      responses:
+        200:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: object
+                example:
+                  Score: 10
+                  Total: 100
+    get:
+      tags:
+      - "authenticated routes"
+      summary: "list of questions and answers the user had answered"
+      responses:
+        201:
+          description: "Success"
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/FullAnswer"
+
+  /questions:
+    get:
+      tags:
+      - "questions"
+      summary: "List all questions"
+      operationId: "listQuestion"
+      responses:
+        200:
+          description: "list of all questions"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Question"
+
+  /questions/sections:
+    get:
+      tags:
+      - "questions"
+      summary: "List all question sections"
+      operationId: "listQuestionSection"
+      responses:
+        200:
+          description: "list of all question sections"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/QuestionSection"
+
+components:
+  schemas:
+    Answer:
+      type: "object"
+      required: 
+      - "question_id"
+      - "choice"
+      properties:
+        question_id:
+          type: "string"
+          format: "uuid"
+          example: "b276df73-f564-4343-abe6-59449fb909e0"
+        choice:
+          type: "string"
+          example: "a"
+    FullAnswer:
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "186fe664-7aad-489a-a365-321182f9082b"
+            user_id:
+              type: string
+              format: uuid
+              example: "21dfc6b2-b609-4b5a-9f8e-2a652fc43711"
+            point:
+              type: number
+              example: 10
+        - $ref: '#/components/schemas/Answer'
+
+    User:
+      type: "object"
+      required:
+      - "name"
+      - "password"
+      properties:
+        name:
+          type: string
+          example: "John Doe"
+        password:
+          type: string
+          example: "strong.PASSWORD"
+    UserResponse:
+      type: object
+      required:
+      - id
+      - name
+      properties:
+        id:
+          type: string
+          example: "6c890d5b-7985-40b2-99b1-099a7ae147be"
+        name:
+          type: string
+          example: "John Doe"
+    UserSession:
+      type: object
+      required:
+      - id
+      - user_id
+      - login_time
+      - last_seen_time
+      properties:
+        id:
+          type: string
+          example: "0b966eb7-a464-4ac5-ac71-bd7a3292396b"
+        user_id:
+          type: string
+          example: "0db73e30-21da-4960-b67f-883db1244199"
+        login_time:
+          type: string
+          format: date-time
+        last_seen_time:
+          type: string
+          format: date-time
+
+    QuestionSection:
+      type: "object"
+      required:
+      - "name"
+      properties:
+        name:
+          type: "string"
+          example: "example section"
+    QuestionSectionResponse:
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "4395a315-137d-4bc7-85df-d6ad9063a1ae"
+        - $ref: '#/components/schemas/QuestionSection'
+
+    Question:
+      type: "object"
+      required:
+      - "question_type"
+      - "question"
+      - "question_section_id"
+      - "choices"
+      properties:
+        question_type:
+          type: "string"
+          enum: ["SINGLE_SELECT", "TRUE_FALSE"]
+        question:
+          type: "string"
+          example: "What is your favorite fruit?"
+        question_section_id:
+          type: "string"
+          format: "uuid"
+          example: "3fa85f64-5717-4562-b3fc-2c963f66afa6"
+        choices:
+          type: "object"
+          example:
+            a:
+              value: "apple"
+              point: 3
+            b:
+              value: "banana"
+              point: 2
+            c:
+              value: "cherry"
+              point: 1
+            d:
+              value: "N/A"
+              point: 0
+    QuestionResponse:
+      allOf:
+        - type: object
+          required:
+            - id
+          properties:
+            id:
+              type: string
+              format: uuid
+              example: "2a5041c8-8e20-4596-947d-aba6ded9f9c2"
+        - $ref: '#/components/schemas/Question'
+              
+tags:
+  - name: "admin routes"
+    description: "Routes only accessible by admins"
+  - name: "users"
+    description: "Routes for operating on users"
+  - name: "authenticated routes"
+    description: "Routes only accessible for logged in users"
+  - name: "questions"
+    description: "Routes for operating on questions"
+                

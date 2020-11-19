@@ -10,6 +10,7 @@ import (
 	"covid-19/internal/database"
 	"covid-19/internal/handler"
 
+	"github.com/go-openapi/runtime/middleware"
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
 )
@@ -28,11 +29,18 @@ func main() {
 
 	r := mux.NewRouter()
 	r.Use(handler.DefaultMiddleware)
+	r.Use(func(next http.Handler) http.Handler {
+		opts := middleware.RedocOpts{}
+		opts.EnsureDefaults()
+		opts.SpecURL = "/static/swagger.yaml"
+		return middleware.Redoc(opts, next)
+	})
 
 	r.HandleFunc("/healthcheck", func(w http.ResponseWriter, r *http.Request) {
 		// an example API handler
 		json.NewEncoder(w).Encode(map[string]bool{"ok": true})
 	})
+	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/doc"))))
 
 	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
 	r.HandleFunc("/_/admin/questions", question.ListQuestions(true)).Methods("GET")
