@@ -14,6 +14,14 @@ func (db Orm) CreateQuestion(q *model.Question) (inserted *model.Question, err e
 	return q, nil
 }
 
+// DeleteQuestion delete a question
+func (db Orm) DeleteQuestion(id string) (err error) {
+	if _, err := db.Table("Question").Where("id = ?", id).Delete(&model.Question{}); err != nil {
+		return errors.WithMessage(err, "Error Creating Question - Database Error")
+	}
+	return nil
+}
+
 // CreateQuestionSection inserts new question section
 func (db Orm) CreateQuestionSection(qs *model.QuestionSection) (inserted *model.QuestionSection, err error) {
 	if _, err := db.Table("QuestionSection").Insert(qs); err != nil {
@@ -79,11 +87,3 @@ func (db Orm) GetQuestionSectionByName(name string) (qs *model.QuestionSection, 
 	}
 	return qs, nil
 }
-
-// // CreateUserSession creates a new user session
-// func (db Orm) CreateUserSession(u *model.UserSession) (inserted *model.UserSession, err error) {
-// 	if _, err := db.Table("UserSession").Insert(u); err != nil {
-// 		return nil, errors.WithMessage(err, "Error Creating UserSession - Database Error")
-// 	}
-// 	return u, nil
-// }

@@ -54,6 +54,7 @@ func UserContextMiddleware(u userService, isProd bool) func(next http.Handler) h
 					sessionIDs := r.URL.Query()["user_session_id"]
 					if len(sessionIDs) == 0 {
 						http.Error(w, "User not authenticated", http.StatusUnauthorized)
+						return
 					}
 					sessionID = sessionIDs[0]
 				}

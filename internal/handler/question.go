@@ -3,9 +3,11 @@ package handler
 import (
 	"covid-19/internal/model"
 	"encoding/json"
+	"fmt"
 	"net/http"
 
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 )
@@ -14,6 +16,7 @@ import (
 type questionService interface {
 	CreateQuestion(*model.Question) (*model.Question, error)
 	CreateQuestionSection(*model.QuestionSection) (*model.QuestionSection, error)
+	DeleteQuestion(string) (err error)
 	ListQuestions() ([]*model.Question, error)
 	ListQuestionSections() ([]*model.QuestionSection, error)
 	GetQuestionByID(id string) (*model.Question, error)
@@ -44,6 +47,20 @@ func (provider QuestionProvider) ListQuestions(isAdmin bool) http.HandlerFunc {
 			}
 			json.NewEncoder(w).Encode(qs)
 		}
+	})
+}
+
+// DeleteQuestion deletes the question
+func (provider QuestionProvider) DeleteQuestion() http.HandlerFunc {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		vars := mux.Vars(r)
+		fmt.Println(vars["question_id"])
+		if err := provider.question.DeleteQuestion(vars["question_id"]); err != nil {
+			log.Error(err)
+			http.Error(w, "Internal Server Error", http.StatusInternalServerError)
+			return
+		}
+		w.WriteHeader(http.StatusOK)
 	})
 }
 

@@ -5,31 +5,11 @@ info:
   title: "Covid-19 Risk Calculator Backend"
 
 servers:
-  - url: http://http://3.130.191.129:8000/
+  - url: http://3.130.191.129:8000
     description: Pulic Test Server
 
 paths:
-  /_/admin/questions:
-    post:
-      tags:
-      - "admin routes"
-      summary: "Add a new question"
-      operationId: "createQuestion"
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              $ref: "#/components/schemas/Question"
-      responses:
-        201:
-          description: "Created"
-          content:
-            application/json:
-              schema:
-                $ref: "#/components/schemas/QuestionResponse"
-
-  /_/admin/questions/sections:
+  _/admin/questions/sections:
     post:
       tags:
       - "admin routes"
@@ -50,8 +30,44 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/QuestionSectionResponse"
+  _/admin/questions:
+    post:
+      tags:
+      - "admin routes"
+      summary: "Add a new question"
+      operationId: "createQuestion"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Question"
+      responses:
+        201:
+          description: "Created"
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/QuestionResponse"
+  _/admin/questions/{quesiton_id}:
+    delete:
+      tags:
+      - "admin routes"
+      summary: "Delete a question"
+      operationId: "deleteQuestion"
+      parameters:
+      - name: quesiton_id
+        in: path
+        description: ID of question to be delted
+        required: true
+        schema:
+          type: string
+          format: uuid
+      responses:
+        200:
+          description: "Deleted"
 
-  /users:
+  users:
     post:
       tags:
       - "users"
@@ -71,7 +87,7 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserResponse"
 
-  /login:
+  login:
     post:
       tags:
       - "users"
@@ -91,7 +107,39 @@ paths:
               schema:
                 $ref: "#/components/schemas/UserSession"
 
-  /user/answers:
+  questions:
+    get:
+      tags:
+      - "questions"
+      summary: "List all questions"
+      operationId: "listQuestion"
+      responses:
+        200:
+          description: "list of all questions"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/Question"
+
+  questions/sections:
+    get:
+      tags:
+      - "questions"
+      summary: "List all question sections"
+      operationId: "listQuestionSection"
+      responses:
+        200:
+          description: "list of all question sections"
+          content:
+            application/json:
+              schema:
+                type: "array"
+                items:
+                  $ref: "#/components/schemas/QuestionSection"
+
+  user/answers:
     post:
       tags:
       - "authenticated routes"
@@ -128,38 +176,6 @@ paths:
                 type: array
                 items:
                   $ref: "#/components/schemas/FullAnswer"
-
-  /questions:
-    get:
-      tags:
-      - "questions"
-      summary: "List all questions"
-      operationId: "listQuestion"
-      responses:
-        200:
-          description: "list of all questions"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/Question"
-
-  /questions/sections:
-    get:
-      tags:
-      - "questions"
-      summary: "List all question sections"
-      operationId: "listQuestionSection"
-      responses:
-        200:
-          description: "list of all question sections"
-          content:
-            application/json:
-              schema:
-                type: "array"
-                items:
-                  $ref: "#/components/schemas/QuestionSection"
 
 components:
   schemas:
@@ -198,15 +214,15 @@ components:
     User:
       type: "object"
       required:
-      - "name"
+      - "username"
       - "password"
       properties:
-        name:
+        username:
           type: string
-          example: "John Doe"
+          example: "john123"
         password:
           type: string
-          example: "strong.PASSWORD"
+          example: "Aa1.Bb2"
     UserResponse:
       type: object
       required:
@@ -310,8 +326,7 @@ tags:
     description: "Routes only accessible by admins"
   - name: "users"
     description: "Routes for operating on users"
-  - name: "authenticated routes"
-    description: "Routes only accessible for logged in users"
   - name: "questions"
     description: "Routes for operating on questions"
-                
+  - name: "authenticated routes"
+    description: "Routes only accessible for logged in users"

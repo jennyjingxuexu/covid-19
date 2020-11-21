@@ -43,6 +43,7 @@ func main() {
 	r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir("./internal/doc"))))
 
 	r.HandleFunc("/_/admin/questions", question.CreateQuestion()).Methods("POST")
+	r.HandleFunc("/_/admin/questions/{question_id}", question.DeleteQuestion()).Methods("DELETE")
 	r.HandleFunc("/_/admin/questions", question.ListQuestions(true)).Methods("GET")
 	r.HandleFunc("/_/admin/questions/sections", question.CreateQuestionSection()).Methods("POST")
 	r.HandleFunc("/users", user.CreateUser()).Methods("POST")
